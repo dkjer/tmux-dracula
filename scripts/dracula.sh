@@ -145,7 +145,7 @@ main()
       fi
 
       if $show_cpu_usage; then
-	 tmux set-option -ga status-right "#[fg=${orange},bg=${powerbg},nobold,nounderscore,noitalics] ${right_sep}#[fg=${dark_gray},bg=${orange}] #($current_dir/cpu_info.sh)"
+	 tmux set-option -ga status-right "#[fg=${orange},bg=${powerbg},nobold,nounderscore,noitalics] ${right_sep}#[fg=${dark_gray},bg=${orange}] CPU #{@dracula_cpu_percent}"
 	 powerbg=${orange}
       fi
 
@@ -226,6 +226,10 @@ main()
   tmux set-window-option -g window-status-format "#[fg=${white}]#[bg=${gray}] #I #W${flags}"
   tmux set-window-option -g window-status-activity-style "bold"
   tmux set-window-option -g window-status-bell-style "bold"
+
+  if $show_cpu_usage; then
+    $current_dir/cpu_info.sh &
+  fi
 }
 
 # run main function

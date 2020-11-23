@@ -18,7 +18,9 @@ get_percent()
 {
 	case $(uname -s) in
 		Linux)
-			percent=$(HOME=/tmp LC_NUMERIC=en_US.UTF-8 top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1"%"}')
+			# Set HOME to /dev/null to avoid using user's .toprc
+			# Use -bn2 and ignore the first iteration to account for top startup
+			percent=$(HOME=/dev/null LC_NUMERIC=en_US.UTF-8 top -bn2 | awk '/^top -/ { p=!p } { if (!p) print }' | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1"%"}')
 			echo $percent
 		;;
 		
@@ -35,12 +37,30 @@ get_percent()
 
 main()
 {
-	# storing the refresh rate in the variable RATE, default is 5
-	RATE=$(get_tmux_option "@dracula-refresh-rate" 5)
-	cpu_percent=$(get_percent)
-	echo "CPU $cpu_percent"
-	sleep $RATE
+	while true; do
+		# storing the refresh rate in the variable RATE, default is 5
+		RATE=$(get_tmux_option "@dracula-refresh-rate" 5)
+		cpu_percent=$(get_percent)
+		tmux set -g @dracula_cpu_percent "$cpu_percent"
+		sleep $RATE
+	done
 }
+
+TMPDIR="$(dirname $(mktemp -u))"
+PIDFILE="$TMPDIR/tmux-cpu-collect-${USER}.pid"
+if [ -e "$PIDFILE" ]; then
+	PID=$(cat "$PIDFILE")
+	# Exit if there is already a running cpu collection script.
+	kill -0 $PID && exit 0
+fi
+echo $$ > "$PIDFILE"
+
+cleanup()
+{
+	rm -f "$PIDFILE"
+}
+trap cleanup EXIT
+
 
 # run main driver
 main
