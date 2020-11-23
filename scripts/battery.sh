@@ -67,7 +67,7 @@ battery_status()
 		;;
 
 		Darwin)
-			status=$(pmset -g batt | sed -n 2p | cut -d ';' -f 2)
+			status=$(pmset -g batt | sed -n 2p | cut -d ';' -f 2 | sed 's/ *//g')
 		;;
 
 		FreeBSD)
@@ -84,16 +84,16 @@ battery_status()
 
 	case $status in
 		discharging|Discharging)
-			echo ''
+			echo ''
 		;;
 		high)
 			echo ''
 		;;
-		charging)
-			echo 'AC'
+		charging|charged)
+			echo 'ﮣ'
 		;;
 		*)
-			echo 'AC'
+			echo ''
 		;;
 	esac
 	### Old if statements didn't work on BSD, they're probably not POSIX compliant, not sure
