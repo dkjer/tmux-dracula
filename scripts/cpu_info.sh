@@ -47,7 +47,9 @@ main()
 }
 
 TMPDIR="$(dirname $(mktemp -u))"
-PIDFILE="$TMPDIR/tmux-cpu-collect-${USER}.pid"
+SOCKET=$(echo $TMUX | cut -d',' -f1 | sed -e 's_.*tmp/__' -e 's~/~_~g')
+
+PIDFILE="$TMPDIR/${SOCKET}-cpu-collect.pid"
 if [ -e "$PIDFILE" ]; then
 	PID=$(cat "$PIDFILE")
 	# Exit if there is already a running cpu collection script.
