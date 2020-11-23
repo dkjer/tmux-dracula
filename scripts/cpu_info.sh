@@ -25,7 +25,8 @@ get_percent()
 		;;
 		
 		Darwin)
-			percent=$(ps -A -o %cpu | awk '{s+=$1} END {print s "%"}')
+			# Use -l2 and ignore the first iteration to account for top startup
+			percent=$(LC_NUMERIC=en_US.UTF-8 top -l2 -n0 | grep '^CPU' | tail -n 1 | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1"%"}')
 			echo $percent
 		;;
 
