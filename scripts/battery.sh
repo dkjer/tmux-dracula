@@ -67,7 +67,7 @@ battery_status()
 		;;
 
 		Darwin)
-			status=$(pmset -g batt | sed -n 2p | cut -d ';' -f 2)
+			status=$(pmset -g batt | sed -n 2p | cut -d ';' -f 2 | sed 's/ *//g')
 		;;
 
 		FreeBSD)
@@ -84,16 +84,16 @@ battery_status()
 
 	case $status in
 		discharging|Discharging)
-			echo ''
+			echo ''
 		;;
 		high)
 			echo ''
 		;;
-		charging)
-			echo 'AC'
+		charging|charged)
+			echo 'ﮣ'
 		;;
 		*)
-			echo 'AC'
+			echo ''
 		;;
 	esac
 	### Old if statements didn't work on BSD, they're probably not POSIX compliant, not sure
@@ -116,7 +116,7 @@ main()
 	elif [ -z "$bat_perc" ]; then # In case it is a desktop with no battery percent, only AC power
 		echo "♥ $bat_stat"
 	else
-		echo "♥ $bat_stat $bat_perc"
+		echo "$bat_stat $bat_perc"
 	fi
 }
 
